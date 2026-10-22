@@ -8,5 +8,5 @@ export const CreateTodoSchema = z.object({
 export const UpdateTodoSchema = z.object({
     title: z.string().min(1, "Title is required"),
     deadline: z.string().optional(),
-    completed: z.boolean(),
+    isCompleted: z.boolean().optional(),
 });
