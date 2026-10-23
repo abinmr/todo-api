@@ -28,7 +28,7 @@ class TodoService {
             data: {
                 title: title,
                 deadline: deadline ? new Date(deadline) : null,
-                isCompleted: isCompleted ? true : false,
+                isCompleted: isCompleted,
             },
         });
     }

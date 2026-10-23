@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "src/config/db.js";
 import StatusCode from "src/constants/statusCode.js";
-import { CreateTodoSchema, UpdateTodoSchema } from "src/schema/todo.schema.js";
+import { CreateTodoSchema, ParmsSchema, UpdateTodoSchema } from "src/schema/todo.schema.js";
 import TodoService from "src/service/todo.service.js";
 
 const todoService = new TodoService(prisma);
@@ -18,15 +18,15 @@ export const getTodos = async (req: Request, res: Response) => {
 
 export const getTodoById = async (req: Request, res: Response) => {
     try {
-        const id = req.params.id as string;
+        const result = ParmsSchema.safeParse(req.params.id);
 
-        if (!id) {
+        if (!result.success) {
             return res.status(StatusCode.badRequest).json({
                 error: "id is required",
             });
         }
 
-        const todo = await todoService.findById(id);
+        const todo = await todoService.findById(result.data.id);
 
         return res.status(StatusCode.success).json(todo);
     } catch (err) {
@@ -65,7 +65,14 @@ export const createTodo = async (req: Request, res: Response) => {
 
 export const updateTodo = async (req: Request, res: Response) => {
     try {
-        const id = req.params.id as string;
+        const parmsResult = ParmsSchema.safeParse(req.params.id);
+
+        if (!parmsResult.success) {
+            return res.status(StatusCode.badRequest).json({ error: parmsResult.error.issues[0]?.message });
+        }
+
+        const { id } = parmsResult.data;
+
         const result = UpdateTodoSchema.safeParse(req.body);
         if (!result.success) {
             return res.status(StatusCode.badRequest).json({ error: result.error.issues[0]?.message });
@@ -95,5 +102,6 @@ export const deleteTodo = async (req: Request, res: Response) => {
         return res.status(StatusCode.success).json(result);
     } catch (err) {
         console.error(err);
+        return res.status(StatusCode.serverError).json({ error: "Servere error" });
     }
 };

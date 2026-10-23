@@ -13,7 +13,7 @@ datasource db {
 }
 
 model Todo {
-    id String @id @default(uuid())
+    id String @id @default(cuid()) @db.Uuid()
     title String
     deadline DateTime?
     isCompleted Boolean @default(false)
