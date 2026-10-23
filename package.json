@@ -29,6 +29,8 @@
         "@types/express": "^5.0.6",
         "@types/node": "^26.6.5",
         "@types/pg": "^8.23.1",
-        "prisma": "7"
+        "esbuild": "^0.28.2",
+        "prisma": "7",
+        "typescript": "^7.0.2"
     }
 }
