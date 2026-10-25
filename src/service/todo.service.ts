@@ -46,6 +46,13 @@ class TodoService {
         });
     }
 
+    public async updateCompletionStatus(id: string, isCompleted: boolean) {
+        return await this.prisma.todo.update({
+            where: { id: id },
+            data: { isCompleted },
+        });
+    }
+
     public async delete(id: string) {
         return await this.prisma.todo.delete({
             where: { id },

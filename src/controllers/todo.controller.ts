@@ -91,6 +91,40 @@ export const updateTodo = async (req: Request, res: Response) => {
     }
 };
 
+export const markTodoComplete = async (req: Request, res: Response) => {
+    try {
+        const paramResult = ParamsSchema.safeParse(req.params);
+        if (!paramResult.success) {
+            return res.status(StatusCode.badRequest).json({
+                error: paramResult.error.issues[0]?.message ?? "Invalid todo ID",
+            });
+        }
+
+        const todo = await todoService.updateCompletionStatus(paramResult.data.id, true);
+        return res.status(StatusCode.success).json(todo);
+    } catch (err: unknown) {
+        console.error(err);
+        return res.status(StatusCode.serverError).json({ error: "Server Error" });
+    }
+};
+
+export const markTodoUncomplete = async (req: Request, res: Response) => {
+    try {
+        const paramResult = ParamsSchema.safeParse(req.params);
+        if (!paramResult.success) {
+            return res.status(StatusCode.badRequest).json({
+                error: paramResult.error.issues[0]?.message ?? "Invalid todo ID",
+            });
+        }
+
+        const todo = await todoService.updateCompletionStatus(paramResult.data.id, false);
+        return res.status(StatusCode.success).json(todo);
+    } catch (err: unknown) {
+        console.error(err);
+        return res.status(StatusCode.serverError).json({ error: "Server Error" });
+    }
+};
+
 export const deleteTodo = async (req: Request, res: Response) => {
     try {
         const paramResult = ParamsSchema.safeParse(req.params);
