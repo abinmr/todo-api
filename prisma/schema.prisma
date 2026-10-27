@@ -13,8 +13,8 @@ datasource db {
 }
 
 model Todo {
-    id String @id @default(cuid()) @db.Uuid()
-    title String
+    id String @id @default(uuid())
+    title String @unique
     deadline DateTime?
     isCompleted Boolean @default(false)
     createdAt DateTime @default(now())

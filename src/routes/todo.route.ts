@@ -7,7 +7,7 @@ router.get("/", getTodos);
 router.get("/:id", getTodoById);
 router.post("/", createTodo);
 router.patch("/:id", updateTodo);
-router.patch("/:id/complete", markTodoComplete)
+router.patch("/:id/complete", markTodoComplete);
 router.patch("/:id/uncomplete", markTodoUncomplete);
 router.delete("/:id", deleteTodo);
 

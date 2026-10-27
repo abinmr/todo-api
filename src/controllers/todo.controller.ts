@@ -51,10 +51,22 @@ export const createTodo = async (req: Request, res: Response) => {
             });
         }
 
+        const exists = await todoService.findByTitle(result.data.title);
+        if (exists) {
+            return res.status(StatusCode.conflict).json({
+                error: "Todo already exists",
+            });
+        }
+
         const todo = await todoService.create(result.data);
 
         return res.status(StatusCode.created).json(todo);
     } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            return res.status(StatusCode.conflict).json({
+                error: "Todo already exists",
+            });
+        }
         console.error("Error creating todo:", err);
         if (err instanceof Error) {
             return res.status(StatusCode.serverError).json({ error: "Failed to create todo", detail: err.message });
@@ -79,12 +91,26 @@ export const updateTodo = async (req: Request, res: Response) => {
             });
         }
 
+        if (bodyResult.data.title) {
+            const existing = await todoService.findByTitle(bodyResult.data.title);
+            if (existing && existing.id !== paramResult.data.id) {
+                return res.status(StatusCode.conflict).json({
+                    error: "Todo already exists",
+                });
+            }
+        }
+
         const todo = await todoService.update(paramResult.data.id, bodyResult.data);
 
         return res.status(StatusCode.success).json(todo);
     } catch (err: unknown) {
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
-            return res.status(StatusCode.notFound).json({ error: "Todo not found" });
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === "P2025") {
+                return res.status(StatusCode.notFound).json({ error: "Todo not found" });
+            }
+            if (err.code === "P2002") {
+                return res.status(StatusCode.conflict).json({ error: "Todo already exists" });
+            }
         }
         console.error("Error updating todo:", err);
         return res.status(StatusCode.serverError).json({ error: "Server error" });
@@ -103,8 +129,11 @@ export const markTodoComplete = async (req: Request, res: Response) => {
         const todo = await todoService.updateCompletionStatus(paramResult.data.id, true);
         return res.status(StatusCode.success).json(todo);
     } catch (err: unknown) {
-        console.error(err);
-        return res.status(StatusCode.serverError).json({ error: "Server Error" });
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return res.status(StatusCode.notFound).json({ error: "Todo not found" });
+        }
+        console.error("Error marking todo complete:", err);
+        return res.status(StatusCode.serverError).json({ error: "Server error" });
     }
 };
 
@@ -120,8 +149,11 @@ export const markTodoUncomplete = async (req: Request, res: Response) => {
         const todo = await todoService.updateCompletionStatus(paramResult.data.id, false);
         return res.status(StatusCode.success).json(todo);
     } catch (err: unknown) {
-        console.error(err);
-        return res.status(StatusCode.serverError).json({ error: "Server Error" });
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return res.status(StatusCode.notFound).json({ error: "Todo not found" });
+        }
+        console.error("Error marking todo uncomplete:", err);
+        return res.status(StatusCode.serverError).json({ error: "Server error" });
     }
 };
 
