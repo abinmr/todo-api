@@ -26,10 +26,6 @@ class TodoService {
         });
     }
 
-    public async findByTodo(title: string) {
-        return await this.findByTitle(title);
-    }
-
     public async create(data: CreateTodoInput) {
         return await this.prisma.todo.create({
             data: {
